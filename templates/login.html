@@ -4,7 +4,7 @@
 <title>Login</title>
 <style>
 .location{
-	position: relative;
+  position: relative;
    left:25%;
    top: 15%;
    width: 40%;
@@ -12,7 +12,7 @@
 </style>
 <div class="location">
 {% block content %}
-    <div class="container">	
+    <div class="container"> 
       <form class="form-signin" method="POST" action="/login">
         <h2 class="form-signin-heading">Please sign in</h2>
         {{ form.hidden_tag() }}
@@ -23,4 +23,5 @@
       </form>
     </div> <!-- /container -->
 {% endblock %}
+<button class="btn btn-primary"><a href="http://127.0.0.1:5000/signup"></a>Signup</button>
 </div>

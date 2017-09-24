@@ -6,6 +6,8 @@ from wtforms.validators import InputRequired, Email, Length
 from flask_sqlalchemy  import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask.ext.permissions.core import Permissions
+from flask.ext.permissions.decorators import user_is, user_has
 
 app = Flask(__name__)
 
@@ -18,6 +20,7 @@ bootstrap = Bootstrap(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+perms = Permissions(app, db, current_user)
 
 #models class, will put it at seperate location and import here
 class User(UserMixin, db.Model):
@@ -27,6 +30,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(15), unique=True)
     email = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(80))
+    roles=db.Column(db.String())
 
 class Content(UserMixin, db.Model):
     """ Creating field for new blog post """
@@ -91,7 +95,9 @@ def signup():
 
     if form.validate_on_submit():
         hashed_password = generate_password_hash(form.password.data, method='sha256')
-        new_user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+        #assigning basic role for every login
+        #Creating role of admin from PgAdmin
+        new_user = User(username=form.username.data, email=form.email.data, password=hashed_password,roles='None')
         db.session.add(new_user)
         db.session.commit()
 
@@ -145,9 +151,10 @@ def edit(slug):
 
 @app.route('/<slug>/delete',methods=['GET', 'POST'])
 @login_required
+@user_is('admin')
 def delete(slug):
     """ Deleting the clicked post from index page """
-
+    #Only admin role user has permission to delete post
     data = Content.query.filter_by(id=slug).first()
     db.session.delete(data)
     db.session.commit()
