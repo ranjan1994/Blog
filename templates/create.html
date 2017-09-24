@@ -1,0 +1,28 @@
+{% import "bootstrap/wtf.html" as wtf %}
+<link href="/static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link href="/static/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+<title>Create content</title>
+<style>
+.location{
+	position: relative;
+   left:25%;
+   top: 15%;
+   width: 40%;
+}
+</style>
+<div class="location">
+
+{% block content %}
+<div class="container">
+
+  <form class="form-create" method="POST" action="/create">
+    <h2>Create</h2>
+    {{ form.hidden_tag() }}
+    {{ wtf.form_field(form.title) }}
+    {{ wtf.form_field(form.detail) }}
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Create</button>
+  </form>
+
+</div> 
+{% endblock %}
+</div>
