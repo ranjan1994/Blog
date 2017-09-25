@@ -1,13 +1,14 @@
 from flask import Flask, render_template, redirect, url_for,request
 from flask_bootstrap import Bootstrap
-from flask_wtf import FlaskForm 
+from flask_wtf import FlaskForm
+import datetime 
 from wtforms import StringField, PasswordField, BooleanField,TextAreaField
 from wtforms.validators import InputRequired, Email, Length
 from flask_sqlalchemy  import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from flask.ext.permissions.core import Permissions
-from flask.ext.permissions.decorators import user_is, user_has
+from flask_permissions.core import Permissions
+from flask_permissions.decorators import user_is, user_has
 
 app = Flask(__name__)
 
@@ -38,6 +39,8 @@ class Content(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title=db.Column(db.String())
     detail=db.Column(db.String())
+    username=db.Column(db.String())
+    time=db.Column(db.DateTime())
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -58,7 +61,6 @@ class RegisterForm(FlaskForm):
 
 class ContentForm(FlaskForm):
     """ New blog post Form """
-    #To add - username and date/time of creating new post 
     title=TextAreaField('title',validators=[InputRequired(),Length(min=10, max=150)])
     detail=TextAreaField('detail',validators=[InputRequired(),Length(min=50, max=1000)])
 
@@ -67,7 +69,7 @@ class ContentForm(FlaskForm):
 def index():
     """ Dashboard page for the blog, contain all the post created """
 
-    data=Content.query.all()
+    data=Content.query.order_by(Content.id)
     return render_template('index.html',name=current_user.username,data=data)
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -95,11 +97,15 @@ def signup():
 
     if form.validate_on_submit():
         hashed_password = generate_password_hash(form.password.data, method='sha256')
+        
+        if User.query.filter_by(email=form.email.data).first():
+            return "<h1>Email Id already exist</h1>"
+        else:
         #assigning basic role for every login
-        #Creating role of admin from PgAdmin
-        new_user = User(username=form.username.data, email=form.email.data, password=hashed_password,roles='None')
-        db.session.add(new_user)
-        db.session.commit()
+        #Creating role of admin from PgAdmin    
+            new_user = User(username=form.username.data, email=form.email.data, password=hashed_password,roles='None')
+            db.session.add(new_user)
+            db.session.commit()
 
         return redirect(url_for('login'))
 
@@ -121,7 +127,7 @@ def create():
     form=ContentForm()
 
     if form.validate_on_submit():
-        new_content = Content(title=form.title.data, detail=form.detail.data)
+        new_content = Content(title=form.title.data, detail=form.detail.data,username=current_user.username,time=datetime.datetime.now())
         db.session.add(new_content)
         db.session.commit()
         return redirect(url_for('index'))
@@ -160,6 +166,16 @@ def delete(slug):
     db.session.commit()
     return redirect(url_for('index'))
 
+@app.route('/admin',methods=['GET', 'POST'])
+@login_required
+@user_is('admin')
+def admin_dash():
+    """Created an Dashboard with total number of posts made by specific user and other overview """
+    data=Content.query.all()
+    user = User.query.all()
+    rows = Content.query.count()
+    return render_template('admin.html', data=data,user=user,rows=rows)       
+
 
 @app.route('/logout')
 @login_required
@@ -172,5 +188,4 @@ def logout():
 if __name__ == '__main__':
     app.run()
 
-#To do : Add admin panel with over all view of the post, i.e total number of post 
 

@@ -1,0 +1,56 @@
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+ <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<style>
+.headline{
+  padding: .015em 0;
+  line-height: 123%;
+  font-family: 'Roboto Condensed', Impact, sans-serif;
+ position: relative;
+ left:30%;
+ top: 5%; 	
+  }
+h2{
+	position: relative;
+	left: 25%;
+	top:03%;
+}  
+.w3-card-4 {
+    float: left;
+    width: 300px;
+    margin-left: 10px;
+    margin-top: 10px;
+    padding: 5px; 
+
+}
+
+</style>
+<div class="headline">
+<h1>Admin Dashboard</h1>
+</div>
+<h2>Total Post in the Blog:{{rows}}</h2>
+{% for detail in user %}
+<div class="card">
+<div class="w3-card-4">
+    <header class="w3-container w3-blue">
+      <h1>{{detail.username}}</h1>
+    </header>
+    {% set count = [0] %}
+    {% for posts in data %}
+	{% if posts.username == detail.username %}
+    <div class="w3-container">
+      <li><strong>{{posts.title}}</strong></li>
+      {% if count.append(count.pop() + 1) %}{% endif %}
+    </div>
+    {% endif %}
+    {% endfor %}
+    <footer class="w3-container w3-blue">
+      <h5><strong>Posts Written -{{count}}</strong></h5>
+    </footer>
+</div>
+</div>    
+{% endfor %}
+
+
