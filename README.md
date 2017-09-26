@@ -18,6 +18,9 @@
 ![edit](https://user-images.githubusercontent.com/29432131/30785433-3981e352-a184-11e7-8731-64dca1ae21e2.PNG)
 
                               Deleting of post can be only done by admin user
-![image](https://user-images.githubusercontent.com/29432131/30785448-6e354490-a184-11e7-84d7-c141533702f4.png)                              
-                              
+![image](https://user-images.githubusercontent.com/29432131/30785448-6e354490-a184-11e7-84d7-c141533702f4.png)
+
+                        Basic Admin dashboard page with total number of post and user specific post  
+![image](https://user-images.githubusercontent.com/29432131/30813820-1d7d873a-a22c-11e7-891b-b6dc80712d8f.png)
+                        
                               
