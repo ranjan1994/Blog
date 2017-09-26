@@ -32,6 +32,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(80))
     roles=db.Column(db.String())
+    login=db.Column(db.Integer())
 
 class Content(UserMixin, db.Model):
     """ Creating field for new blog post """
@@ -41,6 +42,13 @@ class Content(UserMixin, db.Model):
     detail=db.Column(db.String())
     username=db.Column(db.String())
     time=db.Column(db.DateTime())
+
+class Status(UserMixin, db.Model):
+    """ Logging the login-logout time for user """
+    username=db.Column(db.String(),primary_key=True)
+    login=db.Column(db.DateTime())
+    logout=db.Column(db.DateTime())
+                
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -83,6 +91,14 @@ def login():
         if user:
             if check_password_hash(user.password, form.password.data):
                 login_user(user, remember=form.remember.data)
+                #logging the user login time for admin evaluation
+                user_login=Status(username=current_user.username,login=datetime.datetime.now())
+                db.session.add(user_login)
+                db.session.commit()
+                #logging the user who are presently in login session.Assigning login=1, if user is in session
+                user.login=1
+                db.session.commit()
+
                 return redirect(url_for('index'))
 
         return '<h1>Invalid username or password</h1>'
@@ -102,8 +118,9 @@ def signup():
             return "<h1>Email Id already exist</h1>"
         else:
         #assigning basic role for every login
-        #Creating role of admin from PgAdmin    
-            new_user = User(username=form.username.data, email=form.email.data, password=hashed_password,roles='None')
+        #Creating role of "admin" from PgAdmin
+        #logging the user detail who are in session at any instant    
+            new_user = User(username=form.username.data, email=form.email.data, password=hashed_password,roles='None',login=0)
             db.session.add(new_user)
             db.session.commit()
 
@@ -181,11 +198,17 @@ def admin_dash():
 @login_required
 def logout():
     """ Deleting the login session """
-
+     #logging the user log-out time for admin
+    user_logout=Status(username=current_user.username,logout=datetime.datetime.now())
+    db.session.add(user_logout)
+    db.session.commit()
+    ##logging the user who are presently in login session.Assigning login=0, when user is loged out.
+    data = User.query.filter_by(username=current_user.username).first()
+    data.login=0
+    db.session.commit()
     logout_user()
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
     app.run()
-
 

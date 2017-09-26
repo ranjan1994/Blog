@@ -1,21 +1,19 @@
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
 <style>
-.headline{
+.headline,h1{
   padding: .015em 0;
   line-height: 123%;
   font-family: 'Roboto Condensed', Impact, sans-serif;
  position: relative;
  left:30%;
- top: 5%; 	
+ top: 5%;   
   }
-h2{
-	position: relative;
-	left: 25%;
-	top:03%;
+.location,h2{
+  position: relative;
+  left: 25%;
+  top:03%;
 }  
 .w3-card-4 {
     float: left;
@@ -27,8 +25,8 @@ h2{
 }
 
 </style>
-<div class="headline">
 <h1>Admin Dashboard</h1>
+<div class="headline">
 </div>
 <h2>Total Post in the Blog:{{rows}}</h2>
 {% for detail in user %}
@@ -39,7 +37,7 @@ h2{
     </header>
     {% set count = [0] %}
     {% for posts in data %}
-	{% if posts.username == detail.username %}
+  {% if posts.username == detail.username %}
     <div class="w3-container">
       <li><strong>{{posts.title}}</strong></li>
       {% if count.append(count.pop() + 1) %}{% endif %}
@@ -53,4 +51,19 @@ h2{
 </div>    
 {% endfor %}
 
-
+<div class="w3-container"> 
+<h1>Users currently in session</h1>
+<div class="location">
+<div class="w3-card-4">
+<h3 class="w3-container w3-khaki">Username</h3>
+{% set count = [0] %}
+{% for people in user %}
+{% if people.login == 1 %}
+<li><strong>{{people.username}}</strong></li>
+{% if count.append(count.pop() + 1) %}{% endif %}
+{% endif %}
+{% endfor %}
+<h5 class="w3-container w3-text-red"><strong>Total User -{{count}}</strong></h5>
+</div>
+</div>
+</div>
