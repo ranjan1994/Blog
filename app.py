@@ -9,6 +9,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_permissions.core import Permissions
 from flask_permissions.decorators import user_is, user_has
+from forms import LoginForm,RegisterForm,ContentForm
+
 
 app = Flask(__name__)
 
@@ -53,24 +55,6 @@ class Status(UserMixin, db.Model):
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-#Form class, will put it seperate location and import here
-class LoginForm(FlaskForm):
-    """ Form field for login-in registered """
-    username = StringField('username', validators=[InputRequired(), Length(min=4, max=15)])
-    password = PasswordField('password', validators=[InputRequired(), Length(min=8, max=80)])
-    remember = BooleanField('remember me')
-
-class RegisterForm(FlaskForm):
-    """ Form field for registering the user """
-    email = StringField('email', validators=[InputRequired(), Email(message='Invalid email'), Length(max=50)])
-    username = StringField('username', validators=[InputRequired(), Length(min=4, max=15)])
-    password = PasswordField('password', validators=[InputRequired(), Length(min=8, max=80)])
-
-class ContentForm(FlaskForm):
-    """ New blog post Form """
-    title=TextAreaField('title',validators=[InputRequired(),Length(min=10, max=150)])
-    detail=TextAreaField('detail',validators=[InputRequired(),Length(min=50, max=1000)])
 
 @app.route('/')
 @login_required
@@ -158,7 +142,7 @@ def edit(slug):
 
     data = Content.query.filter_by(id=slug).first()
     form=ContentForm()
-    #I found best way to re-populate is to partion request btw GET and POST
+    #found best way to re-populate is to partion request btw GET and POST
     if request.method == 'GET':
         form.title.data= data.title
         form.detail.data= data.detail
