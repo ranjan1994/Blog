@@ -57,8 +57,16 @@
               on {{content.time}}</p>
               <button class="btn btn-primary"><a href="http://127.0.0.1:5000/{{content.id}}/edit">Edit</a></button>
               <button class="btn btn-primary"><a href="http://127.0.0.1:5000/{{content.id}}/delete">Delete</a></button>
+              <button class="btn btn-primary"><a href="http://127.0.0.1:5000/{{content.id}}/comment">Comment</a></button>
           </div>
         </div>
+        <h5>Comment:</h5>
+        {% set count = [1] %}
+        {% for comments in comment %}
+        <p>{{count}}-{{comments.content}} - <b>{{comments.user}}</b> - <b>{{comments.time.strftime('%d-%m-%Y')}}</b></p>
+        {% if count.append(count.pop() + 1) %}{% endif %}
+        {% endfor %}
+
       </div>
     </article>
 

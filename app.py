@@ -9,7 +9,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_permissions.core import Permissions
 from flask_permissions.decorators import user_is, user_has
-from forms import LoginForm,RegisterForm,ContentForm
+from forms import LoginForm,RegisterForm,ContentForm,CommentForm
 
 
 app = Flask(__name__)
@@ -26,6 +26,7 @@ login_manager.login_view = 'login'
 perms = Permissions(app, db, current_user)
 
 #models class, will put it at seperate location and import here
+
 class User(UserMixin, db.Model):
     """ User field for creating new account """
 
@@ -50,11 +51,22 @@ class Status(UserMixin, db.Model):
     username=db.Column(db.String(),primary_key=True)
     login=db.Column(db.DateTime())
     logout=db.Column(db.DateTime())
-                
+
+class Comment(UserMixin, db.Model):
+    """creating the comment for content """
+    id = db.Column(db.Integer, primary_key=True)
+    con_id=db.Column(db.Integer)
+    content=db.Column(db.String())
+    time=db.Column(db.DateTime())
+    user=db.Column(db.String())
+
+
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+#Views starts from here
 
 @app.route('/')
 @login_required
@@ -118,7 +130,8 @@ def detail(slug):
     """ Detail for the clicked post on the index page """
 
     content = Content.query.filter_by(id=slug).first()
-    return render_template('post.html', content=content)
+    comment = Comment.query.filter_by(con_id=slug)
+    return render_template('post.html', content=content,comment=comment)
 
 @app.route('/create',methods=['GET', 'POST'])
 @login_required
@@ -133,7 +146,22 @@ def create():
         db.session.commit()
         return redirect(url_for('index'))
 
-    return render_template('create.html', form=form)            
+    return render_template('create.html', form=form)
+
+@app.route('/<slug>/comment',methods=['GET', 'POST'])
+@login_required
+def comment(slug):
+    """ Creating/adding new comment """
+    form =CommentForm()
+    
+    if form.validate_on_submit():
+
+        new_comment=Comment(con_id=slug,content=form.comment.data,time=datetime.datetime.now(),user=current_user.username)
+        db.session.add(new_comment)
+        db.session.commit()
+        return redirect(url_for('index'))
+
+    return render_template('comment.html', form=form,id=slug)            
 
 @app.route('/<slug>/edit',methods=['GET', 'POST'])
 @login_required
@@ -142,7 +170,7 @@ def edit(slug):
 
     data = Content.query.filter_by(id=slug).first()
     form=ContentForm()
-    #found best way to re-populate is to partion request btw GET and POST
+    #I found best way to re-populate is to partion request btw GET and POST
     if request.method == 'GET':
         form.title.data= data.title
         form.detail.data= data.detail
